@@ -1,67 +1,55 @@
 (ns speedster.core
-  (:import  [org.vertx.java.core Vertx Handler])
-  (:require [speedster.disruptor :as disruptor]
-            [speedster.util      :as util]
-            [phaser.dsl          :as dsl]
-            [phaser.disruptor    :refer [defhandler]]
-            [clojure.data.json   :as json]))
+  (:require [compojure.route     :refer [not-found]]
+            [compojure.handler   :refer [site]]
+            [compojure.core      :refer [defroutes GET POST]]
+            [org.httpkit.server  :refer :all]
+            [speedster.graph     :refer [evaluate-script tinkerpop->clj]]
+            [clojure.data.json   :as json]
+            [clojure.java.io     :refer [reader]]))
 
-(def requests (atom {}))
 
-;;TODO thread things through correctly
-(defn reify-handler [f]
-  (reify Handler
-    (handle [this v] (f v))))
+(defn home-page [req]
+  "Hello, Speedster!")
 
-(def ^{:dynamic true} *publish*
-  nil)
+(defn query-page [req]
+  (with-open [rdr   (reader (:body req) :encoding "UTF-8")]
+    (let [results (->  (apply str (line-seq rdr))
+                     (json/read-str  :key-fn keyword)
+                     evaluate-script)]
+      (json/write-str
+       (if (instance? Exception results)
+         {:results "ERROR"
+          :sucess false}
+         {:results (tinkerpop->clj results)
+          :sucess true})))))
 
-(defhandler respond
-  [event sequence end-of-batch?]
-  (let [req (swap! requests disj (.getUuid event))]
-    (.. req
-        response 
-        (putHeader "content-type" "text/plain")       
-        (end (str (count (.getResults event)))))))
+(defroutes all-routes
+  (GET "/"         [] home-page)
+  (POST "/execute" [] query-page)
+  (not-found "<p>Page not found.</p>"))
 
-(defn submit-query [req]  
-  (.bodyHandler 
-   req
-   (reify-handler (fn [data]
-                    (let [uuid (util/new-uuid)]
-                      (swap! requests conj [uuid req])
-                      (-> (.getString data 0 (.length data))
-                          (json/read-str :key-fn keyword)
-                          (assoc :uuid uuid)
-                          *publish*))))))
+(defn -main [& args]
+  (run-server (site #'all-routes) {:port 8080})
+  (println "Server running"))
 
-(defn index-page [req]
-  (.. req
-      response 
-      (putHeader "content-type" "text/plain")
-      (end "Hello World!\n")))
 
-(defn error-page [req]
-  (.. req
-      response 
-      (putHeader "content-type" "text/plain")
-      (end "No such page!\n")))
 
-(defn handle-request 
-  [req]
-  (case [(.method req) (.path req)]
-    ["GET" "/"]  (index-page req)
-    ["POST" "/execute"] (submit-query req)
-    (error-page req)))
 
-(defn -main 
-  []
-  (let [exec (java.util.concurrent.Executors/newCachedThreadPool)
-        [d publisher] (disruptor/wire-up-disruptor exec respond)
-        handle (reify-handler handle-request)]
-    (alter-var-root (var *publish*) (fn [_] publisher))
-    (.. Vertx newVertx
-        createHttpServer
-        (requestHandler handle)
-        (listen 8080))
-    (println "Server started")))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

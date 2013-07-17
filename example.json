@@ -1,4 +1,4 @@
-{"script": "g.V.fill([])",
+{"script": "g.addVertex();",
  "params":{"a":1}
  "flags" :["read-only"]}
 

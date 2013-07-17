@@ -8,6 +8,7 @@
                  [com.tinkerpop.gremlin/gremlin-java       "2.3.0"]
                  [com.tinkerpop.gremlin/gremlin-groovy     "2.3.0"]
                  [http-kit "2.1.5"]
+                 [compojure "1.1.5"]
                  [org.clojure/data.json "0.2.2"]]
   :aot [speedster.util]
   :main speedster.core)
