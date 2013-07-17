@@ -1,13 +1,4 @@
-# fulgora-frontend
+# speedster
 
-A Clojure library designed to ... well, that part is up to you.
-
-## Usage
-
-FIXME
-
-## License
-
-Copyright © 2013 FIXME
-
-Distributed under the Eclipse Public License, the same as Clojure.
+`lein run` and then hit `/execute` with POST requests. Checkout
+`example.sh` for an example of the API.
