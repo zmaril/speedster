@@ -1,0 +1,4 @@
+{"script": "g.V.fill([])",
+ "params":{"a":1}
+ "flags" :["read-only"]}
+
