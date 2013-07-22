@@ -1,5 +1,3 @@
-package speedster
-
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 import io.gatling.jdbc.Predef._
@@ -13,6 +11,7 @@ object Requests{
 	val httpProtocol = http
 		.baseURL("http://ec2-54-225-75-101.compute-1.amazonaws.com:8080")
 
+	//TODO: better checks on these, especially requests
 	val simple_get = exec(http("Get Index")
 											 .get("/")
   										 .check(status.is(200)))
