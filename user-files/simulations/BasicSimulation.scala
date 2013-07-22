@@ -7,24 +7,14 @@ import io.gatling.http.Headers.Names._
 import scala.concurrent.duration._
 import bootstrap._
 import assertions._
+import Requests._
 
-class SimpleSimulation extends Simulation {
+class BasicSimulation extends Simulation {
+	val scn = scenario("Baseline test")
+		.group("Baseline"){
+			repeat(100){
+				exec(simple_get).exec(simple_post)}}
 
-	val httpProtocol = http
-		.baseURL("http://ec2-50-19-15-5.compute-1.amazonaws.com:8080")
-
-	val headers_1 = Map("Keep-Alive" -> "200")
-
-	val scn = scenario("Up and running")
-		.group("Index") {
-			exec(
-				http("request_1")
-					.get("/")
-					.headers(headers_1)
-					.check(status.is(200)))
-				.pause(0 milliseconds, 100 milliseconds)
-		}
-
-	setUp(scn.inject(ramp(1 users) over (1 seconds)))
+	setUp(scn.inject(ramp(1000 users) over (1 seconds)))
 		.protocols(httpProtocol)
 }
