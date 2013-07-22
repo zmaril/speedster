@@ -11,17 +11,24 @@
 (defn home-page [req]
   "Hello, Speedster!")
 
-(defn query-page [req]
-  (with-open [rdr   (reader (:body req) :encoding "UTF-8")]
-    (let [results (->  (apply str (line-seq rdr))
-                     (json/read-str  :key-fn keyword)
-                     evaluate-script)]
-      (json/write-str
-       (if (instance? Exception results)
-         {:results "ERROR"
-          :sucess false}
-         {:results (tinkerpop->clj results)
-          :sucess true})))))
+(defn query-page [{:keys [body]}]
+  (if body 
+    (with-open [rdr (reader body :encoding "UTF-8")]
+      (let [results (->  rdr
+                         line-seq
+                         (#(apply str %))
+                         (or "")
+                         (json/read-str :key-fn keyword)
+                         evaluate-script)]
+        (json/write-str
+         (if (instance? Exception results)
+           {:results "ERROR"
+            :sucess false}
+           {:results (tinkerpop->clj results)
+            :sucess true}))))
+    (json/write-str
+     {:results "ERROR: NO BODY"
+      :sucess false})))
 
 (defroutes all-routes
   (GET "/"         [] home-page)
