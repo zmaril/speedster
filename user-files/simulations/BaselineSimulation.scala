@@ -11,11 +11,8 @@ import Requests._
 
 class BaselineSimulation extends Simulation {
 	val scn = scenario("Baseline test")
-		.group("Baseline"){
-			repeat(100){
-				exec(simple_get).exec(simple_post)}}
+		.group("Baseline"){repeat(num_repeats){exec(trivial_request)}}
 
-	//TODO: Extract out users and seconds into another object
-	setUp(scn.inject(ramp(1000 users) over (1 seconds)))
+	setUp(scn.inject(ramp(num_users users) over (num_seconds seconds)))
 		.protocols(httpProtocol)
 }

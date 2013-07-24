@@ -10,10 +10,12 @@ import assertions._
 import Requests._
 
 class MixedSimulation extends Simulation {
-	val scn = scenario("Request test")
-		.group("Request"){
-			repeat(100){
-				exec(trivial_request).exec(long_request)}}
+	var n = 50
+	val scn = scenario("Mixed")
+		.group("Mixed"){
+			repeat(n){exec(long_request)}
+			.repeat(100-n){exec(trivial_request)}
+			}
 
 	//TODO: Extract out users and seconds into another object
 	setUp(scn.inject(ramp(1000 users) over (1 seconds)))

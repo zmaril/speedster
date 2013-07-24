@@ -1,3 +1,5 @@
+package speedster
+
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 import io.gatling.jdbc.Predef._
@@ -8,29 +10,38 @@ import assertions._
 
 object Requests{
 
-	val httpProtocol = http
-		.baseURL("http://ec2-54-225-75-101.compute-1.amazonaws.com:8080")
-
-	//TODO: better checks on these, especially requests
-	val simple_get = exec(http("Get Index")
-											 .get("/")
-  										 .check(status.is(200)))
-
-	var simple_post = exec(http("Empty Post Request")
-												 .post("/execute")
-												 .check(status.is(200)))
+	val httpProtocol = http.baseURL(sys.env("URL"))	
+	val URI = sys.env("URI")
+	val num_users   = 1
+  val num_seconds = 1
+  val num_repeats = 1
 
 	var trivial_request = exec(http("Trivial Request")
-														 .post("/execute")
-														 .header("Accept", "application/json")
-														 .header("Content-Type", "application/json")
-   													 .body(StringBody("""{"script":"1+1"}"""))
-														 .check(status.is(200)))
+												 .post(URI)
+												 .header("Accept", "application/json")
+												 .param("script","123456789")
+												 .check(status.is(200),
+																regex("""123456789""")))
 
-	var long_request = exec(http("Long Request")
-													.post("/execute")
+	var short_request   = exec(http("Trivial Request")
+												 .post(URI)
+												 .header("Accept", "application/json")
+												 .param("script","sleep(1);123456789")
+												 .check(status.is(200),
+																regex("""123456789""")))
+
+	var medium_request   = exec(http("Medium Request")
+													.post(URI)
 													.header("Accept", "application/json")
-													.header("Content-Type", "application/json")
-   												.body(StringBody("""{"script":"sleep(10)"}"""))
-													.check(status.is(200)))
+ 	  										  .param("script","sleep(10);123456789")
+   												.check(status.is(200),
+													 			 regex("""123456789""")))
+
+
+	var long_request    = exec(http("Long Request")
+													.post(URI)
+													.header("Accept", "application/json")
+ 	  										  .param("script","sleep(10);123456789")
+   												.check(status.is(200),
+													 			 regex("""123456789""")))
 }

@@ -10,8 +10,8 @@ import assertions._
 import Requests._
 
 class LongSimulation extends Simulation {
-	val scn = scenario("Request test")
-		.group("Request"){repeat(100){exec(long_request)}}
+	val scn = scenario("Long request")
+		.group("Long"){repeat(100){exec(long_request)}}
 
 	//TODO: Extract out users and seconds into another object
 	setUp(scn.inject(ramp(1000 users) over (1 seconds)))
