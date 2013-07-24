@@ -9,9 +9,9 @@ import bootstrap._
 import assertions._
 import Requests._
 
-class LongSimulation extends Simulation {
-	val scn = scenario("Long test")
-		.group("Long"){repeat(num_repeats){exec(long_request)}}
+class ShortSimulation extends Simulation {
+	val scn = scenario("Short test")
+		.group("Short"){repeat(num_repeats){exec(short_request)}}
 
 	setUp(scn.inject(ramp(num_users users) over (num_seconds seconds)))
 		.protocols(httpProtocol)
