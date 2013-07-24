@@ -3,6 +3,7 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :jvm-opts ["-server" "-Xmx25g"]
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [com.tinkerpop.blueprints/blueprints-core "2.3.0"]
                  [com.tinkerpop.gremlin/gremlin-java       "2.3.0"]

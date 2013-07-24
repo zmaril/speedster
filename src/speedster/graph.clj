@@ -54,7 +54,7 @@
   "Runs the script aganist the graph engine with the given parameters
   and returns the results. If there is an error, it returns the error
   object."
-  ([{:keys [script params]}]
+  ([{:keys [script params] :or {script "" params {}}}]
      (locking engine
        (let [bindings (.createBindings engine)]
          (doseq [[k v] params]
