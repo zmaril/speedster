@@ -10,7 +10,7 @@ import assertions._
 
 object Requests{
 	
-	val APP = sys.env("APP")
+	val APP = "rexster"//sys.env("APP")
 	val URL = "http://ec2-54-225-75-101.compute-1.amazonaws.com"
 	var PORT, URI ="";
 
@@ -28,9 +28,9 @@ object Requests{
 	val httpProtocol = http.baseURL(URL+":"+PORT)
 
 
-	val num_users   = 10
+	val num_users   = 1
   val num_seconds = 1
-  val num_repeats = 1000
+  val num_repeats = 1
 
 	def script_request(script:String,result:String):
 			io.gatling.core.structure.ChainBuilder = {
@@ -61,4 +61,47 @@ object Requests{
 	var medium_request   = script_request(acked_for(10),"123456789")
 	var long_request     = script_request(acked_for(100),"123456789")
 	var forever_request  = script_request(acked_for(1000),"123456789")
+
+	//Load up the graph
+	//Query the graph a bunch
+	//Remove said graph
+	var clean_request = exec(http("Clean Graph Request") 
+													.post(URI)
+													.header("Accept", "application/json")
+													.param("script","""
+																 if(g.V().count() == 0){
+																 GraphSONReader.inputGraph(g,new FileInputStream(new File("/home/ubuntu/marvel.graphson")));
+																 }
+																 123456788+1""")
+															 .check(status.is(200),regex("123456789")))
+
+	var names = csv("/home/ubuntu/names.csv").random
+	var name_request = feed(names).exec(http("Named Request") 													
+																			.post(URI)
+																			.header("Accept", "application/json")
+																			.header("Content-Type","application/json")
+																			.body(StringBody("""{
+																				"script": "g.V(\"name\",name).both().both().has(\"name\",name).dedup.sideEffect{it.prop = (new Random()).nextInt(100)}count();123455+1",
+																				"params": {"name": "${name}"}
+																						}"""))
+																			.check(status.is(200),regex("123456")))
+
+	var titles = csv("/home/ubuntu/titles.csv").random
+	var title_request = feed(titles).exec(http("Title Request") 													
+																			.post(URI)
+																			.header("Accept", "application/json")
+																			.header("Content-Type","application/json")
+																			.body(StringBody("""{
+																				"script": "g.V(\"title\",title).both().dedup.sideEffect{it.prop = (new Random()).nextInt(100)}.count();123455+1",
+																				"params": {"title": "${title}"}
+																						}"""))
+																			.check(status.is(200),regex("123456")))
+
+
+	var remove_request = exec(http("Remove Request") 
+														.post(URI)
+														.header("Accept", "application/json")
+														.param("script","g.E().remove();g.V().remove();123456788+1")
+														.check(status.is(200),regex("123456789")))
+
 }
